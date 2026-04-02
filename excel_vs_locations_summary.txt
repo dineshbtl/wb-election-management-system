@@ -1,0 +1,30 @@
+Excel vs reference location list (canonical keys)
+================================================
+
+Files
+  Excel export:     unique_excel_list.csv
+  Reference list:   unique_locations_list.csv  (keys use same rules as build_canonical_locations.py)
+
+Row counts
+  Lines in Excel file (including header):  typically 1 + N; N = data rows below
+  Excel data rows:              20,593
+  Reference canonical keys:     22,754   (deduplicated venue keys from reference)
+
+Cross-check (Excel row -> reference key)
+  Matched (Excel name+district+assembly normalizes to a reference key):  12,678  (61.6%)
+  Not in reference (name/spelling/venue not in list under that key):       7,915  (38.4%)
+
+Excel internal duplicates
+  Distinct canonical keys in Excel:        20,287
+  Keys appearing more than once:          261  (306 extra duplicate rows)
+
+Coverage the other way
+  Reference keys with no Excel row:        10,282  (extra booths/sides in reference, or not in Excel)
+
+Why numbers differ
+  * unique_excel_list.csv  ~20.6k  — one row per Excel location (your target export).
+  * unique_locations_list    ~29.4k  — often splits one building into (l/w), (north side), etc.
+  * unique_locations_list_canonical  ~22.8k  — merged same-venue rows; still more than Excel because
+    the reference includes many places not in this Excel extract, and spelling differs (e.g. lp school vs lps).
+
+Detail rows: excel_vs_locations_detail.csv

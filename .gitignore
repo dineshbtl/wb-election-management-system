@@ -1,0 +1,19 @@
+/node_modules
+/.next/
+/out/
+
+# Web casting: JSON + images on disk (may contain PII)
+/webcasting/submissions/
+
+.env
+.env.local
+
+*.csv
+
+_MACOSX/
+
+.venv_csv/
+
+*.zip
+
+webcasting/submissions/

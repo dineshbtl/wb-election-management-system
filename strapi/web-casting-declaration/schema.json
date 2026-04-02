@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "web_casting_declarations",
+  "info": {
+    "singularName": "web-casting-declaration",
+    "pluralName": "web-casting-declarations",
+    "displayName": "Web Casting Declaration",
+    "description": "Web casting agent declaration submissions (form + ID images)"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "full_name": {
+      "type": "string",
+      "required": true
+    },
+    "father_name": {
+      "type": "string",
+      "required": true
+    },
+    "mother_name": {
+      "type": "string"
+    },
+    "district_id": {
+      "type": "string"
+    },
+    "district": {
+      "type": "string",
+      "required": true
+    },
+    "village": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string",
+      "required": true
+    },
+    "aadhaar_number": {
+      "type": "string",
+      "required": true
+    },
+    "address": {
+      "type": "text",
+      "required": true
+    },
+    "pin": {
+      "type": "string",
+      "required": true
+    },
+    "agency_name": {
+      "type": "string"
+    },
+    "authorised_person_name": {
+      "type": "string"
+    },
+    "designation": {
+      "type": "string"
+    },
+    "agency_mobile": {
+      "type": "string"
+    },
+    "passport_photo": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "aadhaar_front": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "aadhaar_back": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "voter_front": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "voter_back": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
