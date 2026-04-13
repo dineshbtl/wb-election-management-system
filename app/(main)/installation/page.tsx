@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, Modal, message } from "antd";
 import api from "@/lib/api";
 import Link from "next/link";
+import UploadInstallationsModal from "@/components/installation/UploadInstallationsModal";
 
 interface Location {
   id: number;
@@ -57,6 +58,7 @@ export default function InstallationLocationsPage() {
 
   // States
   const [locations, setLocations] = useState<Location[]>([]);
+  const [camerasMap, setCamerasMap] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -85,6 +87,8 @@ export default function InstallationLocationsPage() {
   const [selectedCoordinatorId, setSelectedCoordinatorId] = useState<
     string | null
   >(null);
+
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const [sortOrder, setSortOrder] = useState<"latest" | "ps_asc" | "ps_desc">(
     "latest",
@@ -169,7 +173,41 @@ export default function InstallationLocationsPage() {
     }
   };
 
-  // Fetch locations with all required relations - FIXED POPULATE SYNTAX
+  // Fetch all cameras and group them by booth ID
+  const fetchCamerasList = async () => {
+    try {
+      const res = await api.get("/cameras", {
+        params: {
+          "pagination[pageSize]": 5000, // Fetch a large batch to cover multiple booths
+          populate: "assigned_booth",
+        },
+      });
+
+      const cameras = res.data.data || [];
+      const grouped: any = {};
+
+      cameras.forEach((cam: any) => {
+        const boothId = cam.assigned_booth?.documentId;
+        if (!boothId) return;
+
+        if (!grouped[boothId]) {
+          grouped[boothId] = { IN: [], OUT: [] };
+        }
+
+        if (cam.Position === "IN") {
+          grouped[boothId].IN.push(cam);
+        } else if (cam.Position === "OUT") {
+          grouped[boothId].OUT.push(cam);
+        }
+      });
+
+      setCamerasMap(grouped);
+    } catch (err) {
+      console.error("Failed to fetch cameras map", err);
+    }
+  };
+
+  // Fetch locations with all required relations
   const fetchLocations = async (page = 1, search = searchTerm) => {
     setLoading(true);
     try {
@@ -186,12 +224,6 @@ export default function InstallationLocationsPage() {
         "populate[assembly][fields][1]": "Assembly_Name",
         "populate[assembly][populate][district][fields][0]": "documentId",
         "populate[assembly][populate][district][fields][1]": "district_name",
-
-        "populate[IN_Camera][fields][0]": "Position",
-        "populate[IN_Camera][fields][1]": "state",
-
-        "populate[out_camera][fields][0]": "Position",
-        "populate[out_camera][fields][1]": "state",
       };
 
       // Sort by last updated (newest first)
@@ -243,6 +275,7 @@ export default function InstallationLocationsPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchLocations(1, searchTerm);
+      fetchCamerasList(); // Also refresh cameras map when filters change
     }, 500);
 
     return () => clearTimeout(timer);
@@ -515,18 +548,11 @@ export default function InstallationLocationsPage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {locations.map((loc) => {
-              // Determine status using the populated `survey` relation if available
+              const boothCams = camerasMap[loc.documentId] || { IN: [], OUT: [] };
+              const inInstalled = boothCams.IN.some((c: any) => c.state === "Installed");
+              const outInstalled = boothCams.OUT.some((c: any) => c.state === "Installed");
 
               const coordinator = loc.booth_coordinator;
-              const inInstalled =
-                loc.IN_Camera?.some(
-                  (c) => c.Position === "IN" && c.state === "Installed",
-                ) || false;
-
-              const outInstalled =
-                loc.IN_Camera?.some(
-                  (c) => c.Position === "OUT" && c.state === "Installed",
-                ) || false;
 
               return (
                 <tr
@@ -774,15 +800,9 @@ export default function InstallationLocationsPage() {
     let totalOut = 0;
 
     locations.forEach((loc) => {
-      const inInstalled =
-        loc.IN_Camera?.some(
-          (c) => c.Position === "IN" && c.state === "Installed",
-        ) || false;
-
-      const outInstalled =
-        loc.IN_Camera?.some(
-          (c) => c.Position === "OUT" && c.state === "Installed",
-        ) || false;
+      const boothCams = camerasMap[loc.documentId] || { IN: [], OUT: [] };
+      const inInstalled = boothCams.IN.some((c: any) => c.state === "Installed");
+      const outInstalled = boothCams.OUT.some((c: any) => c.state === "Installed");
 
       if (inInstalled) totalInInstalled++;
       if (outInstalled) totalOutInstalled++;
@@ -815,6 +835,16 @@ export default function InstallationLocationsPage() {
           <p className="text-sm text-gray-600 mt-1">
             Manage booth locations, survey status, and coordinator assignments
           </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setIsBulkModalOpen(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Upload Installations</span>
+          </Button>
         </div>
       </div>
 
@@ -1028,6 +1058,11 @@ export default function InstallationLocationsPage() {
           )}
         </div>
       </Modal>
+      <UploadInstallationsModal
+        open={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        onSuccess={() => fetchLocations(currentPage)}
+      />
     </div>
   );
 }

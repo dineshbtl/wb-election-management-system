@@ -369,13 +369,7 @@ export default function InstallationdetailsPage({ id }: { id: string }) {
                   .filter((c) => c.Position === "IN")
                   .map((cam) => (
                     <div key={cam.id} className="space-y-2">
-                      <p>
-                        <strong>ID:</strong> {cam.Camera_ID}
-                      </p>
-
-                      <p>
-                        <strong>Status:</strong>{" "}
-                        <span
+                       {/* <span
                           className={`px-2 py-1 rounded text-xs ${
                             cam.state === "Installed"
                               ? "bg-green-100 text-green-700"
@@ -383,8 +377,17 @@ export default function InstallationdetailsPage({ id }: { id: string }) {
                           }`}
                         >
                           {cam.state}
-                        </span>
+                        </span> */}
+                      <p>
+                        <strong>ID:</strong> {cam.Camera_ID}
                       </p>
+
+                      <p>
+                        <strong>Status:</strong>{" "}
+                        {cam.camera_status}
+                      </p>
+
+                         
 
                       {/* ✅ IMAGE */}
                       {cam.Photo?.url && (
@@ -418,7 +421,8 @@ export default function InstallationdetailsPage({ id }: { id: string }) {
 
                       <p>
                         <strong>Status:</strong>{" "}
-                        <span
+                        {cam.camera_status}
+                        {/* <span
                           className={`px-2 py-1 rounded text-xs ${
                             cam.state === "Installed"
                               ? "bg-green-100 text-green-700"
@@ -426,7 +430,7 @@ export default function InstallationdetailsPage({ id }: { id: string }) {
                           }`}
                         >
                           {cam.state}
-                        </span>
+                        </span> */}
                       </p>
 
                       {/* ✅ IMAGE */}
